@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useFetch } from "nuxt/app";
-const { data: personnelData, pending, error } = await useFetch("/api/personnel");
+import { Person } from "../../types/person";
+const { data: personnelData, pending, error } = await useFetch<Person[]>("/api/personnel");
 console.log(personnelData.value)
 </script>
 
@@ -10,7 +11,7 @@ console.log(personnelData.value)
     <div v-if="pending">加载中...</div>
     <div v-else-if="error">加载失败：{{ error.message }}</div>
     <ul v-else>
-      <li v-for="person in personnelData.value" :key="person.id">
+      <li v-for="person in personnelData" :key="person.id">
         <p>姓名：{{ person.name }}</p>
         <p>证件编号：{{ person.id_number }}</p>
         <!-- 显示其他字段 -->
