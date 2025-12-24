@@ -7,3 +7,5 @@ export interface Person {
   updated_time: Date | string; // 更新时间
   deleted_time: Date | string | null; // 删除时间，允许为空
 }
+
+export type PersonWithoutId = Omit<Person, "id">;
