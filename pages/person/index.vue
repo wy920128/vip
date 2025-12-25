@@ -1,232 +1,268 @@
-<script setup lang="ts">
-import { useFetch } from "nuxt/app";
-import { ref } from "vue";
-import type { Person } from "../../types/person";
-import type { ApiResponse } from "../../types";
-
-// 分类选项数据（实际项目中可从API获取）
-const categoryOptions = [
-  { label: "重点关注", value: "focus" },
-  { label: "一般关注", value: "normal" },
-  { label: "低风险", value: "low_risk" },
-  { label: "高风险", value: "high_risk" },
-];
-
-// 表单搜索数据
-const formData = ref({
-  categories: [] as string[], // 多选分类
-  name: "", // 姓名
-  idNumber: "", // 身份证号
-});
-
-// 分页相关参数
-const pagination = ref({
-  currentPage: 1,
-  pageSize: 10,
-  total: 0,
-});
-
-// 获取人员数据（带分页和筛选参数）
-const fetchPersonData = async () => {
-  const { data, pending, error, refresh } = await useFetch<
-    ApiResponse<Person[]>
-  >("/api/person", {
-    params: {
-      page: pagination.value.currentPage,
-      pageSize: pagination.value.pageSize,
-      categories: formData.value.categories.join(","),
-      name: formData.value.name,
-      idNumber: formData.value.idNumber,
-    },
-  });
-
-  // 假设API返回格式包含total字段
-  if (data.value?.data.length !== undefined) {
-    pagination.value.total = data.value.data.length;
-  }
-
-  return { data, pending, error, refresh };
-};
-
-// 初始加载数据
-const { data: personData, pending, error, refresh } = await fetchPersonData();
-
-// 搜索按钮事件
-const handleSearch = async () => {
-  pagination.value.currentPage = 1; // 重置到第一页
-  await refresh();
-};
-
-// 重置按钮事件
-const handleReset = async () => {
-  formData.value = {
-    categories: [],
-    name: "",
-    idNumber: "",
-  };
-  pagination.value.currentPage = 1;
-  await refresh();
-};
-
-// 分页变更事件
-const handlePageChange = async (page: number, pageSize: number) => {
-  pagination.value.currentPage = page;
-  pagination.value.pageSize = pageSize;
-  await refresh();
-};
-</script>
-
 <template>
-  <div class="person-list-container">
-    <h1>重点人员列表</h1>
+  <div class="person-container">
+    <el-form :model="searchForm" class="search-form" inline>
+      <el-form-item label="姓名">
+        <el-input
+          v-model="searchForm.name"
+          placeholder="请输入姓名"
+          clearable
+          @keyup.enter="handleSearch"
+        ></el-input>
+      </el-form-item>
+      <el-form-item label="证件编号">
+        <el-input
+          v-model="searchForm.id_number"
+          placeholder="请输入证件编号"
+          clearable
+          @keyup.enter="handleSearch"
+        ></el-input>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="handleSearch" :loading="loading">
+          <el-icon><Search /></el-icon>
+          搜索
+        </el-button>
+        <el-button @click="handleReset">重置</el-button>
+      </el-form-item>
+    </el-form>
 
-    <!-- 加载状态 -->
-    <el-loading v-if="pending" fullscreen text="数据加载中..."></el-loading>
+    <el-table
+      :data="personList"
+      border
+      style="width: 100%; margin-top: 20px"
+      v-loading="loading"
+      empty-text="暂无数据"
+    >
+      <el-table-column prop="id" label="ID" width="80" align="center"></el-table-column>
+      <el-table-column prop="name" label="姓名" width="120" show-overflow-tooltip></el-table-column>
+      <el-table-column prop="gender" label="性别" width="80" align="center">
+        <template #default="scope">
+          <el-tag :type="scope.row.gender === '男' ? 'primary' : 'danger'" size="small">
+            {{ scope.row.gender || "-" }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column prop="id_number" label="证件编号" show-overflow-tooltip>
+        <template #default="scope">
+          {{ scope.row.id_number || "-" }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="created_time" label="创建时间" width="160">
+        <template #default="scope">
+          {{ formatTime(scope.row.created_time) }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="updated_time" label="更新时间" width="160">
+        <template #default="scope">
+          {{ formatTime(scope.row.updated_time) }}
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" width="150" fixed="right" align="center">
+        <template #default="scope">
+          <el-button size="small" type="primary" @click="handleEdit(scope.row)">编辑</el-button>
+          <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
 
-    <!-- 错误提示 -->
-    <el-alert
-      v-else-if="error"
-      type="error"
-      title="加载失败"
-      :description="error.message || '请稍后重试'"
-      show-icon
-      style="margin-bottom: 16px"
-    ></el-alert>
-
-    <el-card v-else>
-      <!-- 搜索表单 -->
-      <el-form
-        :model="formData"
-        inline
-        label-width="80px"
-        style="margin-bottom: 16px"
-      >
-        <el-form-item label="人员分类">
-          <el-select
-            v-model="formData.categories"
-            multiple
-            placeholder="请选择分类"
-            clearable
-            style="width: 200px"
-          >
-            <el-option
-              v-for="option in categoryOptions"
-              :key="option.value"
-              :label="option.label"
-              :value="option.value"
-            />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="姓名">
-          <el-input
-            v-model="formData.name"
-            placeholder="请输入姓名"
-            clearable
-            style="width: 180px"
-            @keyup.enter="handleSearch"
-          />
-        </el-form-item>
-
-        <el-form-item label="身份证号">
-          <el-input
-            v-model="formData.idNumber"
-            placeholder="请输入身份证号"
-            clearable
-            style="width: 220px"
-            @keyup.enter="handleSearch"
-          />
-        </el-form-item>
-
-        <el-form-item>
-          <el-button type="primary" @click="handleSearch">
-            <el-icon><Search /></el-icon>
-            搜索
-          </el-button>
-        </el-form-item>
-
-        <el-form-item>
-          <el-button @click="handleReset">
-            <el-icon><Refresh /></el-icon>
-            重置
-          </el-button>
-        </el-form-item>
-      </el-form>
-
-      <!-- 数据表格 -->
-      <el-table
-        v-if="personData?.data && personData.data.length > 0"
-        :data="personData.data"
-        border
-        stripe
-        style="width: 100%; margin-bottom: 16px"
-        :header-cell-style="{ background: '#f5f7fa' }"
-      >
-        <el-table-column prop="id" label="ID" width="80" align="center" />
-        <el-table-column prop="name" label="姓名" width="120" />
-        <el-table-column prop="gender" label="性别" width="80" align="center">
-          <template #default="scope">
-            <el-tag :type="scope.row.gender === '男' ? 'primary' : 'success'">
-              {{ scope.row.gender }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="id_number" label="证件编号" />
-        <el-table-column prop="created_time" label="创建时间" width="180">
-          <template #default="scope">
-            {{ new Date(scope.row.created_time).toLocaleString() }}
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="160" align="center">
-          <template #default="scope">
-            <el-button size="small" type="text"> 查看 </el-button>
-            <el-button size="small" type="text"> 编辑 </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-
-      <!-- 空状态 -->
-      <el-empty
-        v-else
-        description="暂无符合条件的数据"
-        style="margin: 40px 0"
+    <!-- 分页组件 -->
+    <div class="pagination-container" v-if="pagination.total > 0">
+      <el-pagination
+        v-model:current-page="pagination.current"
+        v-model:page-size="pagination.pageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        :total="pagination.total"
+        layout="total, sizes, prev, pager, next, jumper"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
       />
-
-      <!-- 分页组件 -->
-      <div class="pagination-container" v-if="pagination.total > 0">
-        <el-pagination
-          :current-page="pagination.currentPage"
-          :page-size="pagination.pageSize"
-          :total="pagination.total"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="(val) => handlePageChange(pagination.currentPage, val)"
-          @current-change="(val) => handlePageChange(val, pagination.pageSize)"
-        />
-      </div>
-    </el-card>
+    </div>
   </div>
 </template>
 
+<script setup lang="ts">
+import type { Res } from '~/types';
+import type { Person } from '~/types/person';
+import { Search } from '@element-plus/icons-vue';
+import { useDebounceFn } from '@vueuse/core';
+
+// 响应式数据
+const loading = ref(false);
+const personList = ref<Person[]>([]);
+const searchForm = ref({
+  name: '',
+  id_number: ''
+});
+
+// 分页配置
+const pagination = reactive({
+  current: 1,
+  pageSize: 20,
+  total: 0
+});
+
+// 时间格式化函数
+const formatTime = (time: string | null) => {
+  if (!time) return '-';
+  return new Date(time).toLocaleString('zh-CN');
+};
+
+// 获取人员列表数据
+const getPersonList = async (params: any = {}) => {
+  loading.value = true;
+  
+  try {
+    // 使用 useFetch 并指定返回类型为 Res<Person[]>
+    const { data, error } = await useFetch<Res<Person[]>>('/api/person/get', {
+      method: 'GET',
+      query: {
+        ...params,
+        page: pagination.current,
+        pageSize: pagination.pageSize
+      },
+      key: `person-list-${pagination.current}-${pagination.pageSize}-${JSON.stringify(params)}`,
+      server: true,
+      // 响应拦截 - 基于 Res 接口进行类型安全处理
+      onResponse({ response }) {
+        const responseData = response._data as Res<Person[]>;
+        
+        // 业务状态码检查
+        if (responseData.code !== 200 && responseData.code !== 0) {
+          throw new Error(responseData.message || '获取人员列表失败');
+        }
+        
+        // 如果有分页信息，更新分页状态
+        if (responseData.pagination) {
+          pagination.total = responseData.pagination.total;
+          pagination.current = responseData.pagination.current;
+          pagination.pageSize = responseData.pagination.pageSize;
+        }
+      }
+    });
+
+    // 错误处理
+    if (error.value) {
+      throw new Error(error.value.message || '请求失败');
+    }
+
+    // 类型安全的数据赋值
+    if (data.value) {
+      personList.value = data.value.data || [];
+      
+      // 只有在有数据时才显示成功消息
+      if (personList.value.length > 0) {
+        ElMessage.success(data.value.message || '获取人员列表成功');
+      }
+    }
+
+  } catch (error: any) {
+    console.error('获取人员列表失败:', error);
+    ElMessage.error(`获取失败：${error.message || '未知错误'}`);
+    personList.value = [];
+    pagination.total = 0;
+  } finally {
+    loading.value = false;
+  }
+};
+// 搜索处理 - 添加防抖优化
+const handleSearch = useDebounceFn(() => {
+  pagination.current = 1; // 搜索时重置到第一页
+  const params = Object.fromEntries(
+    Object.entries(searchForm.value).filter(([_, value]) => 
+      value !== '' && value !== undefined && value !== null
+    )
+  );
+  getPersonList(params);
+}, 300);
+// 重置处理
+const handleReset = () => {
+  searchForm.value = {
+    name: '',
+    id_number: ''
+  };
+  pagination.current = 1;
+  getPersonList();
+};
+// 分页处理
+const handleSizeChange = (newSize: number) => {
+  pagination.pageSize = newSize;
+  pagination.current = 1;
+  getPersonList(searchForm.value);
+};
+const handleCurrentChange = (newPage: number) => {
+  pagination.current = newPage;
+  getPersonList(searchForm.value);
+};
+
+// 操作处理
+const handleEdit = (row: Person) => {
+  ElMessage.info(`编辑用户: ${row.name}`);
+  // 这里可以跳转到编辑页面或打开编辑对话框
+};
+
+const handleDelete = async (row: Person) => {
+  try {
+    await ElMessageBox.confirm(`确定要删除用户 "${row.name}" 吗？`, '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    });
+    
+    // 调用删除API
+    const { data } = await useFetch<Res<void>>(`/api/person/delete/${row.id}`, {
+      method: 'DELETE'
+    });
+    
+    if (data.value?.code === 200 || data.value?.code === 0) {
+      ElMessage.success('删除成功');
+      // 重新加载数据
+      getPersonList(searchForm.value);
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('删除失败');
+    }
+  }
+};
+
+// 生命周期
+onMounted(() => {
+  getPersonList();
+});
+
+// 监听路由参数变化（如果需要）
+// const route = useRoute();
+// watch(() => route.query, (newQuery) => {
+//   // 根据路由参数更新搜索条件
+// }, { immediate: true });
+</script>
+
 <style scoped>
-.person-list-container {
+.person-container {
   padding: 20px;
-  max-width: 1400px;
-  margin: 0 auto;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 
-h1 {
-  color: #1f2329;
+.search-form {
+  background: #f5f7fa;
+  padding: 20px;
+  border-radius: 4px;
   margin-bottom: 20px;
-  font-size: 20px;
-  font-weight: 600;
 }
 
 .pagination-container {
-  text-align: right;
-  margin-top: 16px;
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
 }
 
-/* 引入Element Plus图标 */
-@import "element-plus/es/components/icon/style/css";
+:deep(.el-table .cell) {
+  word-break: keep-all;
+}
+
+:deep(.el-table .el-tag) {
+  margin: 2px 0;
+}
 </style>

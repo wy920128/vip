@@ -3,13 +3,14 @@ import { Pool } from "mariadb";
 import type { Connection } from "mariadb/promise";
 import type { PoolConfig } from "mariadb";
 
+const runtimeConfig = useRuntimeConfig();
 // 配置连接池
 const poolConfig: PoolConfig = {
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: parseInt(process.env.DB_PORT!),
+  host: runtimeConfig.db.dbHost,
+  user: runtimeConfig.db.dbUser,
+  password: runtimeConfig.db.dbPassword,
+  database: runtimeConfig.db.dbName,
+  port: parseInt(runtimeConfig.db.dbPort!),
   connectionLimit: 10,
   connectTimeout: 5000,
 };
