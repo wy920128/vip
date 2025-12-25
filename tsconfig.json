@@ -1,5 +1,11 @@
 {
   // https://nuxt.com/docs/guide/concepts/typescript
+  "compilerOptions": {
+    "paths": {
+      "~/*": ["./*"], // 关键：映射 ~/ 到项目根目录
+      "@/*": ["./*"] // @ 通常也会配置，与 ~ 等价
+    }
+  },
   "files": [],
   "references": [
     {

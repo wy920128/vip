@@ -1,8 +1,6 @@
-import { executeQuery } from "../utils/db";
-
 export default defineEventHandler(async (event) => {
   try {
-    const personnel = await executeQuery(`
+    const personnel = await query(`
       SELECT id, name, gender, id_number, created_time, updated_time 
       FROM person 
       WHERE deleted_time IS NULL 
@@ -14,7 +12,7 @@ export default defineEventHandler(async (event) => {
       data: personnel,
     };
   } catch (error) {
-    console.error('Failed to fetch personnel list:', error);
+    console.error("Failed to fetch personnel list:", error);
     throw error;
   }
 });

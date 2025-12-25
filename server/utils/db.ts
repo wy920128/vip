@@ -15,7 +15,7 @@ const poolConfig: PoolConfig = {
 };
 
 // 创建连接池
-const pool: Pool = mariadb.createPool(poolConfig);
+export const pool: Pool = mariadb.createPool(poolConfig);
 
 /**
  * 获取数据库连接
