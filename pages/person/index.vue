@@ -1,232 +1,310 @@
-<template>
-  <div class="person-page">
-    <el-card>
-      <el-form
-        :model="formState"
-        ref="formRef"
-        inline
-        label-width="100px"
-        class="search-form"
-      >
-        <!-- 分类多选下拉菜单 -->
-        <el-form-item label="分类" prop="classifyIds">
-          <el-select
-            v-model="formState.classifyIds"
-            multiple
-            placeholder="请选择分类"
-            clearable
-            style="width: 200px"
-          >
-            <el-option
-              v-for="classify in classifies"
-              :key="classify.id"
-              :label="classify.name"
-              :value="classify.id"
-            />
-          </el-select>
-        </el-form-item>
-
-        <!-- 其他表单字段 -->
-        <el-form-item label="姓名" prop="name">
-          <el-input
-            v-model="formState.name"
-            placeholder="请输入姓名"
-            style="width: 200px"
-          />
-        </el-form-item>
-
-        <el-form-item>
-          <el-button type="primary" @click="handleSearch">搜索</el-button>
-          <el-button @click="handleReset">重置</el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
-
-    <el-card style="margin-top: 20px">
-      <el-table
-        :data="tableData"
-        border
-        style="width: 100%"
-        v-loading="loading"
-      >
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="name" label="姓名" width="120" />
-        <el-table-column prop="age" label="年龄" width="80" />
-        <el-table-column prop="email" label="邮箱" />
-        <el-table-column prop="classifies" label="所属分类" width="200">
-          <template #default="scope">
-            {{ scope.row.classifies.map((c: Classify) => c.name).join(", ") }}
-          </template>
-        </el-table-column>
-      </el-table>
-
-      <!-- 分页组件（仅数据存在时显示） -->
-      <div class="pagination" v-if="tableData.length > 0">
-        <el-pagination
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-          :current-page="pagination.current"
-          :page-sizes="[10, 20, 50, 100]"
-          :page-size="pagination.pageSize"
-          :total="pagination.total"
-          layout="total, sizes, prev, pager, next, jumper"
-        />
-      </div>
-    </el-card>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue";
+import { reactive, onMounted } from "vue";
 import { ElForm, ElMessage } from "element-plus";
-// 导入自定义类型
-import type { Res, ListData, PageParams } from "~/types";
-
-// 核心类型定义
-interface Classify {
-  id: number;
-  name: string;
-}
-
-interface Person {
-  id: number;
-  name: string;
-  age?: number;
-  email?: string;
-  classifies: Classify[]; // 关联的分类信息
-}
-
-// 表单状态类型（继承分页参数，便于扩展）
-interface SearchForm extends PageParams {
-  classifyIds?: number[]; // 选中的分类ID数组（多选）
-  name?: string; // 其他搜索字段
-}
-
+import type { Res } from "~/types";
+import { Refresh, Search } from "@element-plus/icons-vue";
 // 表单相关
-const formRef = ref<InstanceType<typeof ElForm>>();
-const formState: SearchForm = reactive({
-  classifyIds: [],
-  name: "",
-  current: 1, // 分页参数：当前页
-  pageSize: 10, // 分页参数：每页条数
-});
-
-// 分类数据
-const classifies = ref<Classify[]>([]);
-
-// 表格数据
-const tableData = ref<Person[]>([]);
-
-// 加载状态
-const loading = ref(false);
-
-// 分页状态（与接口返回的pagination对齐）
-const pagination = reactive({
-  current: 1,
-  pageSize: 10,
-  total: 0,
-});
-
-// 获取分类列表（从classify表）
-const fetchClassifies = async () => {
-  try {
-    // 明确响应类型：Res<Classify[]>（data是分类数组）
-    const response: Res<Classify[]> = await $fetch("/api/classify", {
-      method: "GET",
-    });
-
-    // 根据后端约定的成功状态码判断（通常是200或0）
-    if (response.code === 200) {
-      classifies.value = response.data || [];
-    } else {
-      ElMessage.error(response.message || "获取分类失败");
-    }
-  } catch (error) {
-    console.error("获取分类异常:", error);
-    ElMessage.error("获取分类失败，请重试");
-  }
-};
-
-// 获取人员列表（从person表，带搜索和分页）
-const fetchPersons = async () => {
-  try {
-    loading.value = true;
-
-    // 构建查询参数（符合PageParams规范）
-    const params: PageParams = {
-      ...formState,
-      current: pagination.current,
-      pageSize: pagination.pageSize,
-    };
-
-    // 明确响应类型：Res<ListData<Person>>（data是带分页的列表数据）
-    const response: Res<ListData<Person>> = await $fetch("/api/persons", {
-      method: "GET",
-      params,
-    });
-
-    if (response.code === 200) {
-      // 从ListData中提取列表和总数
-      tableData.value = response.data?.list || [];
-      pagination.total = response.data?.total || 0;
-
-      // 如果后端返回了pagination，同步到本地（可选）
-      if (response.pagination) {
-        pagination.current = response.pagination.current;
-        pagination.pageSize = response.pagination.pageSize;
+const formData = reactive({
+  data: {
+    classifyIds: [],
+    name: ``,
+    id_number: ``,
+  },
+  classifies: [] as VClassify[],
+  fnc_init: async () => {
+    try {
+      const response: Res<IClassify[]> = await $fetch("/api/classify/get", {
+        method: "GET",
+      });
+      if (response.code === 200) {
+        formData.classifies = [...(response.data?.list || [])];
+        console.log(`分类数据加载成功:`, formData.classifies.length);
+      } else {
+        ElMessage.error(response.message || "获取分类失败");
       }
-    } else {
-      ElMessage.error(response.message || "获取人员数据失败");
+    } catch (error) {
+      console.error("获取分类异常:", error);
+      ElMessage.error("获取分类失败，请重试");
     }
-  } catch (error) {
-    console.error("获取人员异常:", error);
-    ElMessage.error("获取人员数据失败，请重试");
-  } finally {
-    loading.value = false;
-  }
+  },
+  btn_search: async () => {
+    try {
+      tableData.loading = true;
+      const params = {
+        ...formData.data,
+        current: paginationData.current,
+        pageSize: paginationData.pageSize,
+      };
+      const response: Res<IPerson[]> = await $fetch("/api/person/get", {
+        method: "GET",
+        params,
+      });
+      if (response.code === 200) {
+        paginationData.current = response.data?.pagination?.page || 1;
+        paginationData.pageSize = response.data?.pagination?.pageSize || 10;
+        paginationData.total = response.data?.pagination?.total || 0;
+        tableData.list = [...(response.data?.list || [])];
+        console.log(
+          `数据加载成功，当前页: ${paginationData.current}, 总数: ${paginationData.total}`
+        );
+      } else {
+        ElMessage.error(response.message || "获取人员数据失败");
+      }
+    } catch (error) {
+      console.error("获取人员数据异常:", error);
+      ElMessage.error("获取人员数据失败，请重试");
+    } finally {
+      tableData.loading = false;
+    }
+  },
+  btn_reset: () => {
+    formData.data.classifyIds = [];
+    formData.data.name = ``;
+    formData.data.id_number = ``;
+    paginationData.current = 1;
+  },
+});
+// 表格数据
+const tableData = reactive({
+  list: [] as VPerson[],
+  loading: false,
+  fnc_init: async () => {
+    tableData.list.length = 0;
+    tableData.loading = false;
+  },
+});
+// 分页状态（与接口返回的pagination对齐）
+const paginationData = reactive({
+  current: 1,
+  pageSize: 1,
+  total: 0,
+  func_currentChange: async () => {
+    await formData.btn_search();
+  },
+  func_sizeChange: async () => {
+    await formData.btn_search();
+  },
+});
+const init = async () => {
+  await formData.fnc_init();
+  await tableData.fnc_init();
 };
-
-// 搜索处理
-const handleSearch = async () => {
-  pagination.current = 1; // 搜索时重置到第一页
-  await fetchPersons();
-};
-
-// 重置处理
-const handleReset = () => {
-  formRef.value?.resetFields();
-  // 重置分页和表格数据
-  pagination.current = 1;
-  pagination.total = 0;
-  tableData.value = [];
-};
-
-// 分页大小变化
-const handleSizeChange = async (size: number) => {
-  pagination.pageSize = size;
-  pagination.current = 1; // 切换页大小时重置到第一页
-  await fetchPersons();
-};
-
-// 页码变化
-const handleCurrentChange = async (page: number) => {
-  pagination.current = page;
-  await fetchPersons();
-};
-
-// 页面初始化时加载分类数据
 onMounted(async () => {
-  await fetchClassifies();
+  await init();
 });
 </script>
 
-<style scoped>
-.search-form {
-  margin-bottom: 10px;
-}
+<template>
+  <div class="page-person">
+    <div class="search-section">
+      <el-form
+        :inline="true"
+        :model="formData.data"
+        label-position="right"
+        label-suffix=":"
+        label-width="auto"
+      >
+        <el-row :gutter="20">
+          <el-col :span="6">
+            <el-form-item label="分类" prop="classifyIds">
+              <el-select
+                v-model="formData.data.classifyIds"
+                multiple
+                placeholder="请选择分类"
+                clearable
+              >
+                <el-option
+                  v-for="classify in formData.classifies"
+                  :key="classify.id"
+                  :label="classify.name"
+                  :value="classify.id"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item label="姓名" prop="name">
+              <el-input
+                v-model="formData.data.name"
+                placeholder="请输入姓名"
+                clearable
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item label="身份证号" prop="id_number">
+              <el-input
+                v-model="formData.data.id_number"
+                placeholder="请输入身份证号码"
+                clearable
+                maxlength="18"
+                show-word-limit
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item>
+              <el-button-group>
+                <el-button
+                  type="primary"
+                  round
+                  @click="formData.btn_search"
+                  :icon="Search"
+                >
+                  搜索
+                </el-button>
+                <el-button
+                  type="info"
+                  round
+                  @click="formData.btn_reset"
+                  :icon="Refresh"
+                >
+                  重置
+                </el-button></el-button-group
+              >
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+    </div>
+    <div class="table-section">
+      <el-table
+        :border="true"
+        :data="tableData.list"
+        empty-text="暂无数据"
+        style="width: 100%"
+        v-loading="tableData.loading"
+      >
+        <el-table-column align="center" prop="id" label="ID" width="80" />
+        <el-table-column
+          prop="name"
+          label="姓名"
+          width="200"
+          show-overflow-tooltip
+        />
+        <el-table-column
+          align="center"
+          prop="gender"
+          label="性别"
+          width="120"
+        />
+        <el-table-column
+          align="center"
+          prop="id_number"
+          label="身份证号"
+          width="300"
+          show-overflow-tooltip
+        >
+          <template #default="scope">
+            {{ scope.row.id_number || "-" }}
+          </template>
+        </el-table-column>
+        <el-table-column align="center" prop="classifies" label="所属分类">
+          <template #default="scope">
+            {{
+              scope.row.classifies
+                ?.map((classify: VClassify) => classify.name)
+                .join(", ") || "-"
+            }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          align="center"
+          prop="classifies"
+          label="操作"
+          width="200"
+        >
+          <template #default="scope">
+            <el-button
+              size="small"
+              @click="handleDetail(scope.$index, scope.row)"
+            >
+              查看
+            </el-button>
+            <el-button
+              size="small"
+              type="danger"
+              @click="handleEdit(scope.$index, scope.row)"
+            >
+              编辑
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+    <div class="pagination-section">
+      <el-pagination
+        size="large"
+        :background="true"
+        v-model:page-size="paginationData.pageSize"
+        :default-page-size="1"
+        :total="paginationData.total"
+        :pager-count="7"
+        v-model:current-page="paginationData.current"
+        :default-current-page="1"
+        layout="sizes, prev, pager, next, jumper, total, slot"
+        :page-sizes="[1, 20, 50, 100]"
+        prev-text="上一页"
+        prev-icon="el-icon-arrow-left"
+        next-text="下一页"
+        next-icon="el-icon-arrow-right"
+        :hide-on-single-page="false"
+        @size-change="paginationData.func_sizeChange"
+        @current-change="paginationData.func_currentChange"
+      />
+    </div>
+  </div>
+</template>
 
-.pagination {
-  margin-top: 16px;
-  text-align: right;
+<style>
+.page-person {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8f9fa;
+  padding: 20px;
+  box-sizing: border-box;
+  gap: 20px;
+  min-height: 0;
+
+  .search-section {
+    flex: 0 0 auto;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .table-section {
+    flex: 1;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .table-section :deep(.el-table) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .table-section :deep(.el-table__body-wrapper) {
+    flex: 1;
+    overflow: auto;
+  }
+
+  .pagination-section {
+    flex: 0 0 auto;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
 }
 </style>

@@ -1,5 +1,10 @@
 <template>
-  <div>
-    <h1>Welcome to the homepage</h1>
-  </div>
+  <text> 首页 </text>
 </template>
+<script lang="ts" setup>
+</script>
+<style scoped>
+.el-menu--horizontal > .el-menu-item:nth-child(1) {
+  margin-right: auto;
+}
+</style>

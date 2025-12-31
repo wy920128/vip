@@ -53,7 +53,7 @@ export default defineEventHandler(async (event) => {
     let countSql = `
       SELECT COUNT(DISTINCT p.id) as total 
       FROM person p 
-      LEFT JOIN person2classify pc ON p.id = pc.personId 
+      INNER JOIN person2classify pc ON p.id = pc.personId 
       WHERE p.deleted_time IS NULL 
         AND pc.deleted_time IS NULL
     `;
@@ -96,9 +96,9 @@ export default defineEventHandler(async (event) => {
     // 补充分页参数
     params.push(pageSizeNum, offset);
     // 执行查询
-    const [personList] = await db.execute(selectSql, params);
-    const [countResult] = await db.execute(countSql, countParams);
-    const total = (countResult as any[])[0]?.total || 0;
+    const personList = await db.execute(selectSql, params);
+    const countResult = await db.execute(countSql, countParams);
+    const total = Number((countResult as any[])[0]?.total) || 0;
     return {
       code: 200,
       message: "查询成功",
@@ -108,7 +108,7 @@ export default defineEventHandler(async (event) => {
           page: currentPage,
           pageSize: pageSizeNum,
           total,
-          totalPage: Math.ceil(total / pageSizeNum),
+          totalPages: Math.ceil(total / pageSizeNum),
         },
       },
     };

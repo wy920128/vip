@@ -12,13 +12,18 @@
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
     "@element-plus/nuxt": "^1.1.4",
+    "@pinia/nuxt": "^0.11.3",
     "@vueuse/core": "^14.1.0",
     "@vueuse/nuxt": "^14.1.0",
     "element-plus": "^2.13.0",
     "mariadb": "^3.4.5",
     "nuxt": "^4.2.2",
+    "pinia": "^3.0.4",
+    "pinia-plugin-persistedstate": "^4.7.1",
     "vue": "^3.5.26",
     "vue-router": "^4.6.4"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@pinia-plugin-persistedstate/nuxt": "^1.2.1"
+  }
 }

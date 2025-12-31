@@ -4,9 +4,11 @@
     "paths": {
       "~/*": ["./*"], // 关键：映射 ~/ 到项目根目录
       "@/*": ["./*"] // @ 通常也会配置，与 ~ 等价
-    }
+    },
+    "typeRoots": ["./typss"]
   },
   "files": [],
+  // "include": ["types/**/*"],
   "references": [
     {
       "path": "./.nuxt/tsconfig.app.json"

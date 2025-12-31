@@ -37,48 +37,22 @@ export const getConnection = async (): Promise<Connection> => {
  * @param params 参数数组
  * @returns 查询结果（泛型类型，由调用方指定）
  */
-export const query = async <T = unknown>(
+export async function query<T = any>(
   sql: string,
   params: any[] = []
-): Promise<T> => {
+): Promise<T[]> {
   let conn: Connection | null = null;
   try {
     conn = await getConnection();
-    const result = await conn.query(sql, params);
-    return result as T;
+    const result: T[] = await conn.query<T[]>(sql, params);
+    return result;
   } catch (error) {
-    console.error(`查询失败 [${sql}]:`, error);
-    throw error;
+    console.error(`数据库查询失败 [${sql}]:`, error);
+    throw new Error(`数据库查询失败: ${(error as Error).message}`);
   } finally {
     if (conn) conn.end();
   }
-};
-
-/**
- * 执行写操作（适用于 INSERT/UPDATE/DELETE 等）
- * @param sql SQL语句
- * @param params 参数数组
- * @returns 操作结果（包含影响行数等信息）
- */
-export const execute = async (
-  sql: string,
-  params: any[] = []
-): Promise<{ affectedRows: number; insertId?: number }> => {
-  let conn: Connection | null = null;
-  try {
-    conn = await getConnection();
-    const result: any = await conn.query(sql, params);
-    return {
-      affectedRows: result.affectedRows,
-      insertId: result.insertId,
-    };
-  } catch (error) {
-    console.error(`执行操作失败 [${sql}]:`, error);
-    throw error;
-  } finally {
-    if (conn) conn.end();
-  }
-};
+}
 
 /**
  * 关闭连接池（应用退出时调用）
