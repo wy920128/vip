@@ -9,4 +9,4 @@ export interface VClassify {
   id: number; // id为数字类型
   name: string; // 名称
 }
-export type IClassifyWithoutId = Omit<IClassify, "id">;
+export type IClassifyWithoutId = Omit<IClassify, `id`>;

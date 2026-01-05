@@ -7,4 +7,4 @@ export interface IPerson2Classify {
   deleted_time: Date | string | null; // 删除时间，允许为空
 }
 
-export type IPerson2ClassifyWithoutId = Omit<IPerson2Classify, "id">;
+export type IPerson2ClassifyWithoutId = Omit<IPerson2Classify, `id`>;

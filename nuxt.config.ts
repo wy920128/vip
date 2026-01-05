@@ -1,18 +1,15 @@
-import { defineNuxtConfig } from `nuxt/config`;
+import { defineNuxtConfig } from "nuxt/config";
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: `2025-07-15`,
   devtools: { enabled: true },
-  modules: [`@element-plus/nuxt`, `@vueuse/nuxt`, `@pinia/nuxt`, `@pinia-plugin-persistedstate/nuxt`],
+  modules: [`@element-plus/nuxt`, `@vueuse/nuxt`, `@pinia/nuxt`],
   elementPlus: {
     components: [],
     icon: `ElIcon`,
     // importStyle: `scss`,
     themes: [`dark`],
-  },
-  pinia: {
-    autoImports: [`defineStore`]
   },
   runtimeConfig: {
     server: {

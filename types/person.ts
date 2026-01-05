@@ -16,4 +16,4 @@ export interface VPerson {
   id_number: string | null; // 证件编号
   classifies: VClassify[]; // 关联的分类信息
 }
-export type IPersonWithoutId = Omit<IPerson, "id">;
+export type IPersonWithoutId = Omit<IPerson, `id`>;
