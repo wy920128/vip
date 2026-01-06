@@ -3,6 +3,8 @@ import { reactive, onMounted } from "vue";
 import { ElForm, ElMessage } from "element-plus";
 import type { Res } from "~/types";
 import { Refresh, Search } from "@element-plus/icons-vue";
+import type { IClassify, VClassify } from "~/types/classify";
+import type { IPerson, VPerson } from "~/types/person";
 // 表单相关
 const formData = reactive({
   data: {

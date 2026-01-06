@@ -5,12 +5,25 @@ export default defineNuxtConfig({
   compatibilityDate: `2025-07-15`,
   css: [`~/assets/styles/global.css`],
   devtools: { enabled: true },
-  modules: [`@element-plus/nuxt`, `@vueuse/nuxt`, `@pinia/nuxt`],
+  modules: [`@element-plus/nuxt`, `@vueuse/nuxt`],
   elementPlus: {
     components: [],
     icon: `ElIcon`,
     // importStyle: `scss`,
     themes: [`dark`],
+  },
+  nitro: {
+    experimental: {
+      database: true,
+    },
+    database: {
+      default: {
+        connector: `sqlite`,
+        options: {
+          name: `vip`,
+        },
+      },
+    },
   },
   runtimeConfig: {
     server: {

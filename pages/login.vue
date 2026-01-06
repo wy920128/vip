@@ -7,7 +7,6 @@
         :rules="loginRules"
         class="login-form"
       >
-        <!-- 证件编号登录（对应 IPerson 中的 id_number） -->
         <el-form-item prop="username">
           <el-input
             v-model="loginForm.username"
@@ -15,7 +14,6 @@
             prefix-icon="User"
           />
         </el-form-item>
-        <!-- 密码输入 -->
         <el-form-item prop="password">
           <el-input
             v-model="loginForm.password"
@@ -25,7 +23,6 @@
             show-password
           />
         </el-form-item>
-        <!-- 记住密码与忘记密码 -->
         <el-form-item>
           <div class="form-actions">
             <el-checkbox v-model="loginForm.remember">记住密码</el-checkbox>
@@ -51,26 +48,27 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({
-  layout: false,
-});
+definePageMeta({ layout: false });
 import { ref, reactive, onMounted } from "vue";
-import { ElForm, ElMessage, ElLink } from "element-plus";
+import { ElForm, ElMessage } from "element-plus";
 import { useRouter } from "nuxt/app";
-import { useUserStore } from "~/stores/user";
+import { useUserState } from "~/composables/useUserState";
+import type { Res } from "~/types";
+import type { IAuth } from "~/types/auth";
 
-// 表单类型定义
-interface LoginForm {
-  username: string;
-  password: string;
-  remember: boolean;
-}
+const { setUser, setToken, getRememberedUsername, rememberUsername } =
+  useUserState();
+const router = useRouter();
 
 // 表单引用
 const loginFormRef = ref<InstanceType<typeof ElForm>>();
 
 // 登录表单数据
-const loginForm = reactive<LoginForm>({
+const loginForm = reactive<{
+  username: string;
+  password: string;
+  remember: boolean;
+}>({
   username: ``,
   password: ``,
   remember: false,
@@ -90,8 +88,6 @@ const loginRules = {
 
 // 状态管理
 const isLoading = ref(false);
-const router = useRouter();
-const userStore = useUserStore();
 
 // 登录处理
 const handleLogin = async () => {
@@ -101,29 +97,26 @@ const handleLogin = async () => {
 
   try {
     isLoading.value = true;
-    // 调用登录接口（使用 username 作为登录标识）
-    const response: Res<IAuth> = await $fetch(`/api/auth`, {
+    const response: Res<IAuth> = await $fetch(`/api/auth/post`, {
       method: `POST`,
       body: {
         username: loginForm.username,
         password: loginForm.password,
       },
     });
-
-    if (response.success) {
-      // 存储用户信息（类型与 IPerson 对齐）
-      userStore.setUser(response.data.user);
-      userStore.setToken(response.data.token);
-
-      // 记住密码（仅存储证件编号，密码不本地存储）
-      if (loginForm.remember) {
-        localStorage.setItem(`rememberedusername`, loginForm.username);
-      } else {
-        localStorage.removeItem(`rememberedusername`);
+    if (response.code === 200 && response.success) {
+      const userInfo = response.data.list;
+      if (userInfo) {
+        setUser(userInfo);
+        setToken(userInfo.token);
       }
-
-      await router.push(`/`);
+      if (loginForm.remember) {
+        rememberUsername(loginForm.username);
+      } else {
+        document.cookie = `rememberedusername=; max-age=-1; path=/`;
+      }
       ElMessage.success(`登录成功`);
+      await router.push(`/`);
     } else {
       ElMessage.error(response.message || `登录失败`);
     }
@@ -143,9 +136,9 @@ const handleForgotPassword = () => {
 
 // 初始化：填充记住的证件编号
 onMounted(() => {
-  const savedId = localStorage.getItem(`rememberedusername`);
-  if (savedId) {
-    loginForm.username = savedId;
+  const savedUsername = getRememberedUsername();
+  if (savedUsername) {
+    loginForm.username = savedUsername;
     loginForm.remember = true;
   }
 });

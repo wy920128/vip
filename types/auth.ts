@@ -1,9 +1,10 @@
-type UserRole = `admin` | `user` | `editor`;
+export type UserRole = `admin` | `user` | `liekong`;
 export interface IAuth {
   id: number; // id为数字类型
   username: string; // 用户名
   password: string; // 密码
   role: UserRole[]; // 角色数组
+  token: string; // 令牌
   created_time: Date | string; // 创建时间
   updated_time: Date | string; // 更新时间
   deleted_time: Date | string | null; // 删除时间，允许为空

@@ -17,8 +17,7 @@ export interface Res<T = any> {
       totalPages: number; // 总页数
     };
   };
-  // 可选字段：请求状态 (某些后端框架会返回)
-  status?: number;
+  success: boolean;
   // 可选字段：分页信息 (对于列表数据)
   pagination?: {
     current: number; // 当前页码

@@ -1,22 +1,7 @@
-// export default defineEventHandler(async (event) => {
-//   try {
-//     const personnel = await query(`
-//       SELECT id, name, gender, id_number, created_time, updated_time
-//       FROM person
-//       WHERE deleted_time IS NULL
-//       ORDER BY created_time DESC
-//     `);
+import { Res } from "~/types";
+import { IPerson } from "~/types/person";
 
-//     return {
-//       success: true,
-//       data: personnel,
-//     };
-//   } catch (error) {
-//     console.error("Failed to fetch personnel list:", error);
-//     throw error;
-//   }
-// });
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<Res<IPerson[]>> => {
   try {
     const query = getQuery(event);
     const {
@@ -101,7 +86,6 @@ export default defineEventHandler(async (event) => {
     const total = Number((countResult as any[])[0]?.total) || 0;
     return {
       code: 200,
-      message: "查询成功",
       data: {
         list: personList,
         pagination: {
@@ -111,13 +95,26 @@ export default defineEventHandler(async (event) => {
           totalPages: Math.ceil(total / pageSizeNum),
         },
       },
+      message: `查询成功，共 ${total} 条记录`,
+      success: true,
+      timestamp: new Date().toISOString(),
     };
   } catch (error) {
     console.error("查询失败:", error);
     return {
       code: 500,
-      message: "查询失败",
-      error: error instanceof Error ? error.message : String(error),
+      data: {
+        list: [],
+        pagination: {
+          page: 1,
+          pageSize: 1,
+          total: 1,
+          totalPages: 1,
+        },
+      },
+      message: error instanceof Error ? error.message : String(error),
+      success: false,
+      timestamp: new Date().toISOString(),
     };
   }
 });
