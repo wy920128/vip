@@ -3,6 +3,7 @@ import { defineNuxtConfig } from "nuxt/config";
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: `2025-07-15`,
+  css: [`~/assets/styles/global.css`],
   devtools: { enabled: true },
   modules: [`@element-plus/nuxt`, `@vueuse/nuxt`, `@pinia/nuxt`],
   elementPlus: {

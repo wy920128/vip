@@ -16,21 +16,14 @@
   </div>
 </template>
 <script lang="ts" setup></script>
-<style>
-html,
-body {
-  height: 100%;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-}
+<style scoped>
 .layout-default {
   height: 100vh;
   width: 100%;
   display: flex;
   flex-direction: column;
   flex-direction: column;
-  .el-menu {
+  :deep(.el-menu) {
     margin-bottom: 20px;
   }
 }

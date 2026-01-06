@@ -26,11 +26,13 @@
           />
         </el-form-item>
         <!-- 记住密码与忘记密码 -->
-        <el-form-item class="form-actions">
-          <el-checkbox v-model="loginForm.remember">记住密码</el-checkbox>
-          <el-link type="primary" @click="handleForgotPassword"
-            >忘记密码？</el-link
-          >
+        <el-form-item>
+          <div class="form-actions">
+            <el-checkbox v-model="loginForm.remember">记住密码</el-checkbox>
+            <el-link type="primary" @click="handleForgotPassword"
+              >忘记密码？</el-link
+            >
+          </div>
         </el-form-item>
         <!-- 登录按钮 -->
         <el-form-item>
@@ -49,6 +51,9 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({
+  layout: false,
+});
 import { ref, reactive, onMounted } from "vue";
 import { ElForm, ElMessage, ElLink } from "element-plus";
 import { useRouter } from "nuxt/app";
@@ -153,7 +158,6 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   background: #f0f2f5;
-  padding: 20px;
 }
 
 .login-card {
@@ -168,9 +172,12 @@ onMounted(() => {
 }
 
 .form-actions {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin: 0;
+  padding: 0;
 }
 
 .login-btn {
