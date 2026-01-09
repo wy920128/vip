@@ -1,4 +1,4 @@
-export interface IPerson2Classify {
+export interface Classify2Person {
   id: number; // id为数字类型
   personId: number; // 关联的人员ID（对应person表的id）
   classifyId: number; // 关联的分类ID（对应classify表的id）
@@ -7,4 +7,4 @@ export interface IPerson2Classify {
   deleted_time: Date | string | null; // 删除时间，允许为空
 }
 
-export type IPerson2ClassifyWithoutId = Omit<IPerson2Classify, `id`>;
+export type Classify2PersonWithoutId = Omit<Classify2Person, `id`>;

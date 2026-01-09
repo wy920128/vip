@@ -15,46 +15,59 @@ const formData = reactive({
   classifies: [] as VClassify[],
   fnc_init: async () => {
     try {
-      const response: Res<IClassify[]> = await $fetch("/api/classify/get", {
-        method: "GET",
+      const response: Res<IClassify[]> = await $fetch(`/api/classify/get`, {
+        method: `GET`,
       });
       if (response.code === 200) {
         formData.classifies = [...(response.data?.list || [])];
         console.log(`分类数据加载成功:`, formData.classifies.length);
       } else {
-        ElMessage.error(response.message || "获取分类失败");
+        ElMessage.error(response.message || `获取分类失败`);
       }
     } catch (error) {
-      console.error("获取分类异常:", error);
-      ElMessage.error("获取分类失败，请重试");
+      console.error(`获取分类异常:`, error);
+      ElMessage.error(`获取分类失败，请重试`);
     }
   },
   btn_search: async () => {
     try {
       tableData.loading = true;
       const params = {
-        ...formData.data,
-        current: paginationData.current,
+        classifyIds: formData.data.classifyIds.join(`,`),
+        id_number: formData.data.id_number,
+        name: formData.data.name,
+        page: paginationData.current,
         pageSize: paginationData.pageSize,
       };
-      const response: Res<IPerson[]> = await $fetch("/api/person/get", {
-        method: "GET",
+      const response: Res<IPerson[]> = await $fetch(`/api/person/get`, {
+        method: `GET`,
         params,
       });
       if (response.code === 200) {
         paginationData.current = response.data?.pagination?.page || 1;
         paginationData.pageSize = response.data?.pagination?.pageSize || 10;
         paginationData.total = response.data?.pagination?.total || 0;
-        tableData.list = [...(response.data?.list || [])];
+        tableData.list = response.data?.list.map((row) => ({
+          ...row,
+          classify: row.classify
+            ? (() => {
+                try {
+                  return JSON.parse(row.classify);
+                } catch (e) {
+                  return [];
+                }
+              })()
+            : [],
+        }));
         console.log(
           `数据加载成功，当前页: ${paginationData.current}, 总数: ${paginationData.total}`
         );
       } else {
-        ElMessage.error(response.message || "获取人员数据失败");
+        ElMessage.error(response.message || `获取人员数据失败`);
       }
     } catch (error) {
-      console.error("获取人员数据异常:", error);
-      ElMessage.error("获取人员数据失败，请重试");
+      console.error(`获取人员数据异常:`, error);
+      ElMessage.error(`获取人员数据失败，请重试`);
     } finally {
       tableData.loading = false;
     }
@@ -78,7 +91,7 @@ const tableData = reactive({
 // 分页状态（与接口返回的pagination对齐）
 const paginationData = reactive({
   current: 1,
-  pageSize: 1,
+  pageSize: 10,
   total: 0,
   func_currentChange: async () => {
     await formData.btn_search();
@@ -179,6 +192,7 @@ onMounted(async () => {
       >
         <el-table-column align="center" prop="id" label="ID" width="80" />
         <el-table-column
+          align="center"
           prop="name"
           label="姓名"
           width="200"
@@ -192,19 +206,30 @@ onMounted(async () => {
         />
         <el-table-column
           align="center"
-          prop="id_number"
-          label="身份证号"
-          width="300"
+          label="证件信息"
+          min-width="350"
           show-overflow-tooltip
         >
           <template #default="scope">
-            {{ scope.row.id_number || "-" }}
+            <div v-if="scope.row.credentials && scope.row.credentials.length">
+              <div
+                v-for="(item, idx) in scope.row.credentials"
+                :key="idx"
+                style="margin: 2px 0"
+              >
+                <el-tag size="small" type="primary" style="margin-right: 8px">
+                  {{ item.type || "未知类型" }}
+                </el-tag>
+                <span>{{ item.number || "-" }}</span>
+              </div>
+            </div>
+            <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column align="center" prop="classifies" label="所属分类">
+        <el-table-column align="center" label="所属分类" min-width="200">
           <template #default="scope">
             {{
-              scope.row.classifies
+              scope.row.classify
                 ?.map((classify: VClassify) => classify.name)
                 .join(", ") || "-"
             }}

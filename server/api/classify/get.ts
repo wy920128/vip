@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
       // 分页参数
       page = 1,
       pageSize = 10,
-      // person 表字段搜索条件
+      // person 表字段搜索条件(id,name,gender是classify表的字段)
       id,
       name,
       // 忽略其他无关参数
@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
     let selectSql = `
       SELECT DISTINCT c.* 
       FROM classify c 
-      LEFT JOIN person2classify pc ON c.id = pc.classifyId 
+      LEFT JOIN classify2person pc ON c.id = pc.classifyId 
       WHERE c.deleted_time IS NULL 
         AND pc.deleted_time IS NULL
     `;

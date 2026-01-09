@@ -55,7 +55,8 @@ import { useRouter } from "nuxt/app";
 import { useUserState } from "~/composables/useUserState";
 import type { Res } from "~/types";
 import type { IAuth } from "~/types/auth";
-
+import bcrypt from "bcryptjs";
+console.log(`密码,${bcrypt.hashSync(`123456`, 10)}`);
 const { setUser, setToken, getRememberedUsername, rememberUsername } =
   useUserState();
 const router = useRouter();

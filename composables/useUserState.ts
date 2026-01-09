@@ -7,11 +7,11 @@ import { useUserCookieStorage } from "./useCookieStorage";
 export const useUserState = () => {
   // 1. 内存响应式状态（Nuxt 内置 useState，SSR 安全）
   const userState = useState<VAuth & { token: string; expiresAt: number }>(
-    "user",
+    `user`,
     () => ({
-      token: "",
+      token: ``,
       id: 0,
-      username: "",
+      username: ``,
       role: [],
       expiresAt: 0,
     })
@@ -28,7 +28,7 @@ export const useUserState = () => {
         ...userState.value,
         token: cookieData.token,
         id: cookieData.user?.id || 0,
-        username: cookieData.user?.username || "",
+        username: cookieData.user?.username || ``,
         role: cookieData.user?.role || [],
         expiresAt: cookieData.expiresAt,
       };
@@ -67,9 +67,9 @@ export const useUserState = () => {
   const logout = () => {
     // 清空内存状态
     userState.value = {
-      token: "",
+      token: ``,
       id: 0,
-      username: "",
+      username: ``,
       role: [],
       expiresAt: 0,
     };
@@ -77,7 +77,7 @@ export const useUserState = () => {
     clearCookie();
     // 清空记住的用户名（客户端操作）
     if (import.meta.client) {
-      document.cookie = "rememberedusername=; max-age=-1; path=/";
+      document.cookie = `rememberedusername=; max-age=-1; path=/`;
     }
   };
 
@@ -128,7 +128,7 @@ export const useUserState = () => {
       const match = document.cookie.match(/rememberedusername=([^;]+)/);
       return match?.[1] ? decodeURIComponent(match[1]) : ``;
     }
-    return "";
+    return ``;
   };
 
   return {
