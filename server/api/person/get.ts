@@ -33,6 +33,8 @@ export default defineEventHandler(async (event): Promise<Res<IPerson[]>> => {
         p.name,
         p.gender,
         p.credentials,
+        p.created_time,
+        p.updated_time,
         COALESCE(
           (SELECT JSON_ARRAYAGG(
             JSON_OBJECT('id', c.id, 'name', c.name)
