@@ -1,24 +1,25 @@
-// server/api/auth/post.ts
-import { defineEventHandler, readBody, createError } from "h3";
+/*
+ * @Author: 王野 18545455617@163.com
+ * @Date: 2026-01-06 08:38:45
+ * @LastEditors: 王野 18545455617@163.com
+ * @LastEditTime: 2026-01-14 15:06:04
+ * @FilePath: /vip/server/api/auth/post.ts
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
+import { query } from "~/server/utils/db";
 import { SignJWT } from "jose";
 import bcrypt from "bcryptjs";
 import type { Res } from "~/types/index";
-import type { IAuth, VAuth } from "~/types/auth";
+import type { IAuth, Pauth, VAuth } from "~/types/auth";
 
 // JWT密钥（推荐通过Nuxt环境变量配置，.env文件）
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
-
-// 登录请求体类型（补充，对齐前端传参）
-interface LoginRequest {
-  username: string;
-  password: string;
-}
 
 export default defineEventHandler(
   async (event): Promise<Res<(VAuth & { token: string }) | null>> => {
     try {
       // 1. 读取并验证请求体
-      const body: LoginRequest = await readBody<LoginRequest>(event);
+      const body: Pauth = await readBody<Pauth>(event);
       const { username, password } = body;
       if (!username || username === ``) {
         throw createError({
@@ -41,7 +42,8 @@ export default defineEventHandler(
     `;
       // 绑定用户名参数
       params.push(username);
-      const userResult: IAuth[] = await db.execute(userSelectSql, params);
+    // 执行查询
+      const userResult: IAuth[] = await query(userSelectSql, params);
       if (userResult.length !== 1) {
         throw createError({
           statusCode: 401,

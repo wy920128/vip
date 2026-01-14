@@ -1,10 +1,26 @@
-export interface Classify2Person {
-  id: number; // id为数字类型
-  personId: number; // 关联的人员ID（对应person表的id）
-  classifyId: number; // 关联的分类ID（对应classify表的id）
-  created_time: Date | string; // 创建时间
-  updated_time: Date | string; // 更新时间
-  deleted_time: Date | string | null; // 删除时间，允许为空
-}
+import type { TimeStamp } from ".";
 
-export type Classify2PersonWithoutId = Omit<Classify2Person, `id`>;
+/** 人员关联分类表-本体 */
+interface Person2Classify {
+  person_id: number; // 人员ID
+  classify_id: number; // 分类ID
+  created_time: TimeStamp; // 创建时间
+  updated_time: TimeStamp; // 更新时间
+  deleted_time: TimeStamp; // 软删除标记
+}
+/** 人员关联分类表-展示用VO */
+interface Person2ClassifyVO extends Person2Classify {
+  person_name?: string; // 人员姓名
+  classify_name?: string; // 分类名称
+}
+/** 人员关联分类表-提交用PO（创建/更新） */
+interface Person2ClassifyPO {
+  person_id: number; // 人员ID
+  classify_id: number; // 分类ID
+}
+/** 人员关联分类表-查询用GO（筛选条件） */
+interface Person2ClassifyGO {
+  person_id?: number;
+  classify_id?: number;
+  deleted_time?: null; // 筛选未删除数据
+}

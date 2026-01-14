@@ -1,3 +1,11 @@
+/*
+ * @Author: 王野 18545455617@163.com
+ * @Date: 2025-12-25 09:10:00
+ * @LastEditors: 王野 18545455617@163.com
+ * @LastEditTime: 2026-01-14 15:06:38
+ * @FilePath: /vip/server/api/classify/get.ts
+ * @Description: classify GET请求接口
+ */
 import { query } from "~/server/utils/db";
 
 export default defineEventHandler(async (event) => {
@@ -46,7 +54,6 @@ export default defineEventHandler(async (event) => {
     const classifyList = await query(selectSql, params);
     return {
       code: 200,
-      message: "查询成功",
       data: {
         list: classifyList,
         pagination: {
@@ -56,6 +63,7 @@ export default defineEventHandler(async (event) => {
           totalPage: 1,
         },
       },
+      message: "查询成功",
     };
   } catch (error) {
     console.error("查询失败:", error);

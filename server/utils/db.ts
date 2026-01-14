@@ -1,3 +1,11 @@
+/*
+ * @Author: 王野 18545455617@163.com
+ * @Date: 2025-12-24 10:12:05
+ * @LastEditors: 王野 18545455617@163.com
+ * @LastEditTime: 2026-01-14 15:03:05
+ * @FilePath: /vip/server/utils/db.ts
+ * @Description: 后台数据库连接池
+ */
 import mariadb from "mariadb";
 import { Pool } from "mariadb";
 import type { Connection } from "mariadb/promise";
@@ -6,11 +14,11 @@ import type { PoolConfig } from "mariadb";
 const runtimeConfig = useRuntimeConfig();
 // 配置连接池
 const poolConfig: PoolConfig = {
-  host: runtimeConfig.db.dbHost,
-  user: runtimeConfig.db.dbUser,
-  password: runtimeConfig.db.dbPassword,
-  database: runtimeConfig.db.dbName,
-  port: parseInt(runtimeConfig.db.dbPort!),
+  host: runtimeConfig.db_aliyun.dbHost,
+  user: runtimeConfig.db_aliyun.dbUser,
+  password: runtimeConfig.db_aliyun.dbPassword,
+  database: runtimeConfig.db_aliyun.dbName,
+  port: parseInt(runtimeConfig.db_aliyun.dbPort!),
   connectionLimit: 10,
   connectTimeout: 5000,
 };
