@@ -6,7 +6,7 @@
  * @FilePath: /vip/types/auth2department.ts
  * @Description: types/auth2department 用户关联部门表
  */
-import type { TimeStamp } from ".";
+import type { PageParams, TimeStamp } from ".";
 
 /** 用户关联部门表-本体 */
 interface Auth2Department {
@@ -27,7 +27,7 @@ interface Auth2DepartmentPO {
   department_id: number; // 部门ID
 }
 /** 用户关联部门表-查询用GO（筛选条件） */
-interface Auth2DepartmentGO {
+interface Auth2DepartmentGO extends PageParams {
   auth_id?: number;
   department_id?: number;
   deleted_time?: null; // 筛选未删除数据

@@ -6,7 +6,7 @@
  * @FilePath: /vip/types/auth2person.ts
  * @Description: types/auth2person 用户关联人员表
  */
-import type { TimeStamp } from ".";
+import type { PageParams, TimeStamp } from ".";
 
 /** 用户关联人员表-本体 */
 interface Auth2Person {
@@ -27,7 +27,7 @@ interface Auth2PersonPO {
   person_id: number; // 人员ID
 }
 /** 用户关联人员表-查询用GO（筛选条件） */
-interface Auth2PersonGO {
+interface Auth2PersonGO extends PageParams {
   auth_id?: number;
   person_id?: number;
   deleted_time?: null; // 筛选未删除数据

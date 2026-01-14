@@ -1,4 +1,4 @@
-import type { TimeStamp } from ".";
+import type { PageParams, TimeStamp } from ".";
 
 /** 人员关联分类表-本体 */
 interface Person2Classify {
@@ -19,7 +19,7 @@ interface Person2ClassifyPO {
   classify_id: number; // 分类ID
 }
 /** 人员关联分类表-查询用GO（筛选条件） */
-interface Person2ClassifyGO {
+interface Person2ClassifyGO extends PageParams {
   person_id?: number;
   classify_id?: number;
   deleted_time?: null; // 筛选未删除数据

@@ -6,7 +6,7 @@
  * @FilePath: /vip/types/person2record.ts
  * @Description: types/person2record 人员关联记录表
  */
-import type { TimeStamp } from ".";
+import type { PageParams, TimeStamp } from ".";
 
 /** 人员关联记录表-本体 */
 interface Person2Record {
@@ -27,7 +27,7 @@ interface Person2RecordPO {
   record_id: number; // 记录ID
 }
 /** 人员关联记录表-查询用GO（筛选条件） */
-interface Person2RecordGO {
+interface Person2RecordGO extends PageParams {
   person_id?: number;
   record_id?: number;
   deleted_time?: null; // 筛选未删除数据

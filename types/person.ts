@@ -5,7 +5,7 @@
  * @LastEditTime: 2026-01-14 15:45:15
  * @FilePath: /vip/types/person.ts
  * @Description: types/person 人员
- */import type { TimeStamp } from ".";/** 人员证件项 */
+ */import type { PageParams, TimeStamp } from ".";/** 人员证件项 */
 interface CertificateItem {
   type: string; // 证件类型（如二代身份证、护照）
   value: string; // 证件号
@@ -48,7 +48,7 @@ interface PersonPO {
   address: AddressItem[]; // 联系地址
 }
 /** 人员表-查询用GO（筛选条件） */
-interface PersonGO {
+interface PersonGO extends PageParams {
   id?: number;
   name?: string; // 模糊查询
   gender?: '男' | '女';

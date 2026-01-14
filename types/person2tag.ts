@@ -6,7 +6,7 @@
  * @FilePath: /vip/types/person2tag.ts
  * @Description: types/person2tag 人员关联标签表
  */
-import type { TimeStamp } from ".";
+import type { PageParams, TimeStamp } from ".";
 
 /** 人员关联标签表-本体 */
 interface Person2Tag {
@@ -27,7 +27,7 @@ interface Person2TagPO {
   tag_id: number; // 标签ID
 }
 /** 人员关联标签表-查询用GO（筛选条件） */
-interface Person2TagGO {
+interface Person2TagGO extends PageParams {
   person_id?: number;
   tag_id?: number;
   deleted_time?: null; // 筛选未删除数据

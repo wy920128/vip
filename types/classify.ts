@@ -6,7 +6,7 @@
  * @FilePath: /vip/types/classify.ts
  * @Description: types/classify 分类
  */
-import type { TimeStamp } from ".";/** 分类表-本体 */
+import type { PageParams, TimeStamp } from ".";/** 分类表-本体 */
 interface Classify {
   id: number; // 分类主键ID
   name: string; // 分类名称(如涉酒, 涉毒, 涉赌等)
@@ -22,7 +22,7 @@ interface ClassifyPO {
   name: string; // 分类名称
 }
 /** 分类表-查询用GO（筛选条件） */
-interface ClassifyGO {
+interface ClassifyGO extends PageParams {
   id?: number;
   name?: string; // 模糊查询
   deleted_time?: null; // 筛选未删除数据

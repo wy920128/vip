@@ -6,7 +6,7 @@
  * @FilePath: /vip/types/auth2classify.ts
  * @Description: types/auth2classify 用户关联分类表
  */
-import type { TimeStamp } from ".";
+import type { PageParams, TimeStamp } from ".";
 
 /** 用户关联分类表-本体 */
 interface Auth2Classify {
@@ -27,7 +27,7 @@ interface Auth2ClassifyPO {
   classify_id: number; // 分类ID
 }
 /** 用户关联分类表-查询用GO（筛选条件） */
-interface Auth2ClassifyGO {
+interface Auth2ClassifyGO extends PageParams {
   auth_id?: number;
   classify_id?: number;
   deleted_time?: null; // 筛选未删除数据

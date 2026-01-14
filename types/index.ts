@@ -2,11 +2,14 @@
  * 分页查询参数接口 (通常与Res配合使用)
  */
 export interface PageParams {
-  current?: number; // 当前页码
+  page?: number; // 当前页码
   pageSize?: number; // 每页大小
 }
+
 /** 通用时间字段类型（后端返回的时间戳/ISO字符串） */
-export type TimeStamp = string | null;/**
+export type TimeStamp = string | null;
+
+/**
  * 通用API响应接口
  * @param T 数据类型泛型，默认为any
  */

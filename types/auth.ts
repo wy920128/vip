@@ -2,11 +2,11 @@
  * @Author: 王野 18545455617@163.com
  * @Date: 2026-01-14 15:53:23
  * @LastEditors: 王野 18545455617@163.com
- * @LastEditTime: 2026-01-14 15:53:33
+ * @LastEditTime: 2026-01-14 16:48:54
  * @FilePath: /vip/types/auth.ts
  * @Description: types/auth 用户表
  */
-import type { TimeStamp } from ".";
+import type { PageParams, TimeStamp } from ".";
 
 /** 用户表-本体 */
 interface Auth {
@@ -31,7 +31,7 @@ interface AuthPO {
   role: string[]; // 用户角色
 }
 /** 用户表-查询用GO（筛选条件） */
-interface AuthGO {
+interface AuthGO extends PageParams {
   id?: number;
   username?: string; // 模糊查询
   role?: string | string[]; // 角色筛选

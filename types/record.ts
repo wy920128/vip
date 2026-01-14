@@ -6,7 +6,7 @@
  * @FilePath: /vip/types/record.ts
  * @Description: types/record 记录
  */
-import type { TimeStamp } from ".";
+import type { PageParams, TimeStamp } from ".";
 
 /** 记录表-本体 */
 interface Record {
@@ -27,7 +27,7 @@ interface RecordPO {
   content: string; // 事件内容
 }
 /** 记录表-查询用GO（筛选条件） */
-interface RecordGO {
+interface RecordGO extends PageParams {
   id?: number;
   content?: string; // 全文模糊查询
   person_id?: number; // 关联人员筛选

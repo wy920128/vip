@@ -5,7 +5,7 @@
  * @LastEditTime: 2026-01-14 15:32:39
  * @FilePath: /vip/types/department.ts
  * @Description: types/department 部门
- */import type { TimeStamp } from ".";/** 部门表-本体 */
+ */import type { PageParams, TimeStamp } from ".";/** 部门表-本体 */
 interface Department {
   id: number; // 部门主键ID
   name: string; // 部门名称
@@ -29,7 +29,7 @@ interface DepartmentPO {
   path: string; // 部门层级路径
 }
 /** 部门表-查询用GO（筛选条件） */
-interface DepartmentGO {
+interface DepartmentGO extends PageParams {
   id?: number;
   name?: string; // 模糊查询
   parent_id?: number | null;

@@ -14,7 +14,7 @@
  * @FilePath: /vip/types/tag.ts
  * @Description: types/tag 标签
  */
-import type { TimeStamp } from ".";/** 标签表-本体 */
+import type { PageParams, TimeStamp } from ".";/** 标签表-本体 */
 interface Tag {
   id: number; // 标签主键ID
   name: string; // 标签名称(如涉酒, 涉毒, 涉赌等)
@@ -30,7 +30,7 @@ interface TagPO {
   name: string; // 标签名称
 }
 /** 标签表-查询用GO（筛选条件） */
-interface TagGO {
+interface TagGO extends PageParams {
   id?: number;
   name?: string; // 模糊查询
   deleted_time?: null; // 筛选未删除数据
