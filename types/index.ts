@@ -39,3 +39,16 @@ export interface Res<T = any> {
   // 可选字段：时间戳
   timestamp: TimeStamp;
 }
+
+export * from "./auth";
+export * from "./auth2classify";
+export * from "./auth2department";
+export * from "./auth2person";
+export * from "./classify";
+export * from "./department";
+export * from "./person";
+export * from "./person2classify";
+export * from "./person2record";
+export * from "./record";
+export * from "./record2tag";
+export * from "./tag";

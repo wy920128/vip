@@ -2,7 +2,7 @@
  * @Author: 王野 18545455617@163.com
  * @Date: 2025-12-24 09:46:58
  * @LastEditors: 王野 18545455617@163.com
- * @LastEditTime: 2026-01-14 15:45:15
+ * @LastEditTime: 2026-01-15 08:58:25
  * @FilePath: /vip/types/person.ts
  * @Description: types/person 人员
  */import type { PageParams, TimeStamp } from ".";/** 人员证件项 */
@@ -21,7 +21,7 @@ interface AddressItem {
   value: string; // 地址内容
 }
 /** 人员表-本体 */
-interface Person {
+export interface Person {
   id: number; // 人员主键ID
   name: string; // 人员姓名
   gender: '男' | '女'; // 人员性别
@@ -33,13 +33,13 @@ interface Person {
   deleted_time: TimeStamp; // 软删除标记
 }
 /** 人员表-展示用VO */
-interface PersonVO extends Person {
-  classify_names?: string[]; // 关联的分类名称
-  tag_names?: string[]; // 关联的标签名称
-  record_contents?: string[]; // 关联的记录内容
+export interface PersonVO extends Person {
+  classify?: string | string[]; // 关联的分类名称
+  tag?: string[]; // 关联的标签名称
+  record?: string[]; // 关联的记录内容
 }
 /** 人员表-提交用PO（创建/更新） */
-interface PersonPO {
+export interface PersonPO {
   id?: number; // 更新时传，创建时不传
   name: string; // 人员姓名
   gender: '男' | '女'; // 人员性别
@@ -48,7 +48,7 @@ interface PersonPO {
   address: AddressItem[]; // 联系地址
 }
 /** 人员表-查询用GO（筛选条件） */
-interface PersonGO extends PageParams {
+export interface PersonGO extends PageParams {
   id?: number;
   name?: string; // 模糊查询
   gender?: '男' | '女';

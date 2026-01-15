@@ -44,7 +44,7 @@ body {
   gap: 8px;
 }
 
-.btn-group .el-button {
+.btn-group {
   flex: 1;
 }
 

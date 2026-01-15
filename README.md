@@ -2,7 +2,7 @@
  * @Author: 王野 18545455617@163.com
  * @Date: 2025-12-24 08:06:59
  * @LastEditors: 王野 18545455617@163.com
- * @LastEditTime: 2026-01-14 14:57:23
+ * @LastEditTime: 2026-01-15 09:47:27
  * @FilePath: /vip/README.md
  * @Description: 项目文档
 -->
@@ -285,19 +285,7 @@
    UNIQUE KEY uk_person_classify (person_id, classify_id)
    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='人员关联分类表';
 
-   -- 11. 创建人员关联标签表(person2tag)
-   CREATE TABLE IF NOT EXISTS person2tag (
-   person_id INT UNSIGNED NOT NULL COMMENT '人员 ID',
-   tag_id INT UNSIGNED NOT NULL COMMENT '标签 ID',
-   created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-   updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-   deleted_time TIMESTAMP NULL DEFAULT NULL COMMENT '软删除标记',
-   FOREIGN KEY (person_id) REFERENCES person(id) ON DELETE CASCADE,
-   FOREIGN KEY (tag_id) REFERENCES tag(id) ON DELETE CASCADE,
-   UNIQUE KEY uk_person_tag (person_id, tag_id)
-   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='人员关联标签表';
-
-   -- 12. 创建人员关联记录表(person2record)
+   -- 11. 创建人员关联记录表(person2record)
    CREATE TABLE IF NOT EXISTS person2record (
    person_id INT UNSIGNED NOT NULL COMMENT '人员 ID',
    record_id INT UNSIGNED NOT NULL COMMENT '记录 ID',
@@ -308,6 +296,18 @@
    FOREIGN KEY (record_id) REFERENCES record(id) ON DELETE CASCADE,
    UNIQUE KEY uk_person_record (person_id, record_id)
    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='人员关联记录表';
+
+   -- 12. 创建记录关联标签表(record2tag)
+   CREATE TABLE IF NOT EXISTS record2tag (
+   record_id INT UNSIGNED NOT NULL COMMENT '记录 ID',
+   tag_id INT UNSIGNED NOT NULL COMMENT '标签 ID',
+   created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+   updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+   deleted_time TIMESTAMP NULL DEFAULT NULL COMMENT '软删除标记',
+   FOREIGN KEY (record_id) REFERENCES record(id) ON DELETE CASCADE,
+   FOREIGN KEY (tag_id) REFERENCES tag(id) ON DELETE CASCADE,
+   UNIQUE KEY uk_record_tag (record_id, tag_id)
+   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='记录关联标签表';  
 
    -- 插入部门数据(层级：1 管理员 →2 处级 →3 科级)
    INSERT INTO department (name, parent_id, level, path) VALUES
@@ -367,9 +367,9 @@
    (1, 1), -- 张三属于涉酒分类
    (2, 2); -- 李四属于涉毒分类
 
-   INSERT INTO person2tag (person_id, tag_id) VALUES
-   (1, 1), -- 张三标记为高风险
-   (2, 2); -- 李四标记为重点关注
+   INSERT INTO record2tag (record_id, tag_id) VALUES
+   (1, 1), -- 记录 1 标记为饮酒
+   (2, 2); -- 记录 2 标记为言语冲突
 
    INSERT INTO person2record (person_id, record_id) VALUES
    (1, 1), -- 张三关联记录 1

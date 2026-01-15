@@ -88,8 +88,8 @@ const redirectToLogin = () => {
 onMounted(async () => {
   try {
     // 模拟短暂延迟（可选，优化体验）
-    await new Promise(resolve => setTimeout(resolve, 200));
-    
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
     // 登录态无效则跳转
     if (!isLoginValid.value) {
       redirectToLogin();
@@ -112,17 +112,10 @@ watch(isLoginValid, (newVal) => {
 </script>
 
 <style scoped>
-/* 原有样式保留 */
-.el-menu--horizontal > .el-menu-item:nth-child(1) {
-  margin-right: auto;
-}
-
-/* 新增/优化样式 */
 .home-container {
   padding: 20px;
 }
 
-/* 加载态样式 */
 .loading {
   padding: 20px;
   color: #666;

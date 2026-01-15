@@ -1,68 +1,68 @@
 <template>
   <div class="login-container">
-    <el-card class="login-card" header="用户登录">
-      <el-form
+    <a-card class="login-card" title="用户登录">
+      <a-form
+        class="login-form"
+        layout="vertical"
         ref="loginFormRef"
         :model="loginForm"
         :rules="loginRules"
-        class="login-form"
       >
-        <el-form-item prop="username">
-          <el-input
+        <a-form-item name="username">
+          <a-input
             v-model="loginForm.username"
             placeholder="请输入用户名"
             prefix-icon="User"
           />
-        </el-form-item>
-        <el-form-item prop="password">
-          <el-input
+        </a-form-item>
+        <a-form-item name="password">
+          <a-input
             v-model="loginForm.password"
             type="password"
             placeholder="请输入密码"
             prefix-icon="Lock"
             show-password
           />
-        </el-form-item>
-        <el-form-item>
+        </a-form-item>
+        <a-form-item>
           <div class="form-actions">
-            <el-checkbox v-model="loginForm.remember">记住密码</el-checkbox>
-            <el-link type="primary" @click="handleForgotPassword"
-              >忘记密码？</el-link
+            <a-checkbox v-model="loginForm.remember">7日内免登录</a-checkbox>
+            <a-link type="primary" @click="handleForgotPassword"
+              >忘记密码？</a-link
             >
           </div>
-        </el-form-item>
+        </a-form-item>
         <!-- 登录按钮 -->
-        <el-form-item>
-          <el-button
+        <a-form-item>
+          <a-button
             type="primary"
             class="login-btn"
             @click="handleLogin"
             :loading="isLoading"
           >
             登录
-          </el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
+          </a-button>
+        </a-form-item>
+      </a-form>
+    </a-card>
   </div>
 </template>
 
 <script setup lang="ts">
 definePageMeta({ layout: false });
 import { ref, reactive, onMounted } from "vue";
-import { ElForm, ElMessage } from "element-plus";
 import { useRouter } from "nuxt/app";
 import { useUserState } from "~/composables/useUserState";
-import type { Res } from "~/types";
-import type { IAuth } from "~/types/auth";
+import type { AuthVO, Res } from "~/types";
 import bcrypt from "bcryptjs";
+import { message } from "ant-design-vue";
 console.log(`密码,${bcrypt.hashSync(`123456`, 10)}`);
-const { setUser, setToken, getRememberedUsername, rememberUsername } =
+const { setUser, setToken, getRememberedUsername } =
   useUserState();
 const router = useRouter();
 
 // 表单引用
-const loginFormRef = ref<InstanceType<typeof ElForm>>();
+const loginFormRef = ref();
 
 // 登录表单数据
 const loginForm = reactive<{
@@ -98,11 +98,12 @@ const handleLogin = async () => {
 
   try {
     isLoading.value = true;
-    const response: Res<IAuth> = await $fetch(`/api/auth/post`, {
+    const response: Res<Omit<AuthVO & { token: string }, `password`>> = await $fetch(`/api/auth/login`, {
       method: `POST`,
       body: {
         username: loginForm.username,
         password: loginForm.password,
+        expiresIn: loginForm.remember ? `7d` : `1h`,
       },
     });
     if (response.code === 200 && response.success) {
@@ -111,19 +112,14 @@ const handleLogin = async () => {
         setUser(userInfo);
         setToken(userInfo.token);
       }
-      if (loginForm.remember) {
-        rememberUsername(loginForm.username);
-      } else {
-        document.cookie = `rememberedusername=; max-age=-1; path=/`;
-      }
-      ElMessage.success(`登录成功`);
+      message.success(`登录成功`);
       await router.push(`/`);
     } else {
-      ElMessage.error(response.message || `登录失败`);
+      message.error(response.message || `登录失败`);
     }
   } catch (error) {
     console.error(`登录错误:`, error);
-    ElMessage.error(`服务器异常，请稍后重试`);
+    message.error(`服务器异常，请稍后重试`);
   } finally {
     isLoading.value = false;
   }
@@ -131,7 +127,7 @@ const handleLogin = async () => {
 
 // 忘记密码处理
 const handleForgotPassword = () => {
-  ElMessage.info(`请联系管理员重置密码`);
+  message.info(`请联系管理员重置密码`);
   // 实际项目可跳转至密码重置页面
 };
 
